@@ -23,7 +23,7 @@ fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res
 			console.log(`${differenceSeconds} / 60 = ${differenceMinutes} / 60 = ${differenceHours}`);
 			fs.readFile('lastUpdatedValue', (err, data) => {
 				if (data != updated) {
-					if (differenceHours > 24) {
+					if (differenceHours >= 24) {
 						console.log('There is a new version!');
 						let webhookClient = new WebhookClient({ url: process.env.DISCORD_WEBHOOK_URL});
 						webhookClient.send({
