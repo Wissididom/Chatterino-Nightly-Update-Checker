@@ -17,7 +17,7 @@ fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res
 			let date = new Date();
 			date.setDate(date.getDate() - 1);
 			let updated = xmlEntry['updated'][0];
-			let updatedDate = new Date(updatedDate);
+			let updatedDate = new Date(updated);
 			let timestamp = Math.floor(updatedDate.getTime() / 1000);
 			let differenceSeconds = (new Date() - updatedDate) / 1000;
 			let differenceMinutes = differenceSeconds / 60;
