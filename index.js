@@ -27,7 +27,7 @@ fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res
 						console.log('There is a new version!');
 						let webhookClient = new WebhookClient({ url: process.env.DISCORD_WEBHOOK_URL});
 						webhookClient.send({
-							username: 'Chatterino',
+							username: 'Chatterino Nightly',
 							avatarURL: 'https://camo.githubusercontent.com/6ca305d42786c9dbd0b76f5ade013601b080d71a598e881b4349dff2eafae6c7/68747470733a2f2f666f757274662e636f6d2f696d672f63686174746572696e6f2d69636f6e2d36342e706e67',
 							content: `New Nightly Version:\nChangelog (Unversioned): <${changelogLink}>\nLink: <${nightlyLink}>\nOSX: <${nightlyOsxLink}>\nWindows: <${nightlyWinLink}>\nAppImage: <${nightlyAppImageLink}>\nDEB: <${nightlyDebLink}>`
 						}).catch(err => console.error(err));
