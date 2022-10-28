@@ -19,23 +19,23 @@ fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res
 			let updated = xmlEntry['updated'][0];
 			let updatedDate = new Date(updated);
 			let timestamp = Math.floor(updatedDate.getTime() / 1000);
-			let differenceSeconds = (new Date() - updatedDate) / 1000;
-			let differenceMinutes = differenceSeconds / 60;
-			let differenceHours = differenceMinutes / 60;
-			console.log(`${differenceSeconds} / 60 = ${differenceMinutes} / 60 = ${differenceHours}`);
+			//let differenceSeconds = (new Date() - updatedDate) / 1000;
+			//let differenceMinutes = differenceSeconds / 60;
+			//let differenceHours = differenceMinutes / 60;
+			//console.log(`${differenceSeconds} / 60 = ${differenceMinutes} / 60 = ${differenceHours}`);
 			fs.readFile('lastUpdatedValue', async (err, data) => {
-				if (data.toString().trim() != updated) {
+				if (data.toString().trim() != updated.trim()) {
 					console.log('There is a new version!');
 					let latestCommitMessage = await fetch('https://github.com/Chatterino/chatterino2/commits/master.atom').then(res => res.text()).then(text => {
 						return xml2js.parseStringPromise(text);
 					}).then(xmlCommitObj => {
-						return xmlCommitObj['feed']['entry'][0]['content'][0]['_'].replace(/(<([^>]+)>)/gi, '').trim();
+						return xmlCommitObj['feed']['entry'][0]['title'][0].trim();
 					}).catch(err => console.error(err));
 					let webhookClient = new WebhookClient({ url: process.env.DISCORD_WEBHOOK_URL});
 					webhookClient.send({
 						username: 'Chatterino Nightly',
 						avatarURL: 'https://camo.githubusercontent.com/6ca305d42786c9dbd0b76f5ade013601b080d71a598e881b4349dff2eafae6c7/68747470733a2f2f666f757274662e636f6d2f696d672f63686174746572696e6f2d69636f6e2d36342e706e67',
-						content: `New Nightly Version (Updated: <t:${timestamp}>):\nLatest Commit Message: \`${latestCommitMessage}\`\nChangelog (Unversioned): <${changelogLink}>\nLink: <${nightlyLink}>\nOSX: <${nightlyOsxLink}>\nWindows: <${nightlyWinLink}>\nAppImage: <${nightlyAppImageLink}>\nDEB: <${nightlyDebLink}>`
+						content: `New Nightly Version (Updated: <t:${timestamp}>):\nLatest Commit Message: \`${latestCommitMessage}\`\nChangelog: <${changelogLink}>\nLink: <${nightlyLink}>\nOSX: <${nightlyOsxLink}>\nWindows: <${nightlyWinLink}>\nAppImage: <${nightlyAppImageLink}>\nDEB: <${nightlyDebLink}>`
 					}).catch(err => console.error(err));
 				} else {
 					console.log('Already latest version!');
