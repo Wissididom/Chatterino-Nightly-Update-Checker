@@ -48,12 +48,6 @@ fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res
 							console.error(await res.text());
 						}
 					}).catch(err => console.error(err));
-					/*let webhookClient = new WebhookClient({ url: process.env.DISCORD_WEBHOOK_URL});
-					webhookClient.send({
-						username: webhookUsername,
-						avatarURL: webhookAvatarUrl,
-						content: `New Nightly Version (Updated: <t:${timestamp}:F>):\nLatest Commit Message: \`\`${latestCommit['title'][0].trim()}\`\` by \`\`${latestCommit['author'][0]['name'][0].trim()}\`\`\nChangelog: <${changelogLink}>\nLink: <${nightlyLink}>`
-					}).catch(err => console.error(err));*/
 				} else {
 					console.log('Already latest version!');
 				}
