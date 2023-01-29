@@ -1,9 +1,12 @@
 require('dotenv').config();
+const util = require('node:util');
 const xml2js = require('xml2js');
 const fs = require('fs');
-const { WebhookClient } = require('discord.js');
+const webhookUsername = 'Chatterino Nightly';
+const webhookAvatarUrl = 'https://camo.githubusercontent.com/6ca305d42786c9dbd0b76f5ade013601b080d71a598e881b4349dff2eafae6c7/68747470733a2f2f666f757274662e636f6d2f696d672f63686174746572696e6f2d69636f6e2d36342e706e67';
 const changelogLink = 'https://github.com/Chatterino/chatterino2/blob/master/CHANGELOG.md';
 const nightlyLink = 'https://github.com/Chatterino/chatterino2/releases/tag/nightly-build';
+const contentFormatString = "New Nightly Version (Updated: <t:%d:F>):\nLatest Commit Message: ``%s`` by ``%s``\nChangelog: <%s>\nLink: <%s>";
 fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res.text()).then(text => {
 	return xml2js.parseStringPromise(text);
 }).then(xmlObj => {
@@ -27,12 +30,30 @@ fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res
 					}).then(xmlCommitObj => {
 						return xmlCommitObj['feed']['entry'][0];
 					}).catch(err => console.error(err));
-					let webhookClient = new WebhookClient({ url: process.env.DISCORD_WEBHOOK_URL});
-					webhookClient.send({
-						username: 'Chatterino Nightly',
-						avatarURL: 'https://camo.githubusercontent.com/6ca305d42786c9dbd0b76f5ade013601b080d71a598e881b4349dff2eafae6c7/68747470733a2f2f666f757274662e636f6d2f696d672f63686174746572696e6f2d69636f6e2d36342e706e67',
-						content: `New Nightly Version (Updated: <t:${timestamp}:F>):\nLatest Commit Message: \`\`${latestCommit['title'][0].trim()}\`\` by \`\`${latestCommit['author'][0]['name'][0].trim()}\`\`\nChangelog: <${changelogLink}>\nLink: <${nightlyLink}>`
+					fetch(`${process.env.DISCORD_WEBHOOK_URL}?wait=true`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							username: webhookUsername,
+							avatar_url: webhookAvatarUrl,
+							allowed_mentions: {
+								parse: []
+							}, // Disable any kind of mention
+							content: util.format(contentFormatString, timestamp, latestCommit['title'][0].trim(), latestCommit['author'][0]['name'][0].trim(), changelogLink, nightlyLink)
+						})
+					}).then(async res => {
+						if (!res.ok) {
+							console.error(await res.text());
+						}
 					}).catch(err => console.error(err));
+					/*let webhookClient = new WebhookClient({ url: process.env.DISCORD_WEBHOOK_URL});
+					webhookClient.send({
+						username: webhookUsername,
+						avatarURL: webhookAvatarUrl,
+						content: `New Nightly Version (Updated: <t:${timestamp}:F>):\nLatest Commit Message: \`\`${latestCommit['title'][0].trim()}\`\` by \`\`${latestCommit['author'][0]['name'][0].trim()}\`\`\nChangelog: <${changelogLink}>\nLink: <${nightlyLink}>`
+					}).catch(err => console.error(err));*/
 				} else {
 					console.log('Already latest version!');
 				}
