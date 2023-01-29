@@ -4,10 +4,6 @@ const fs = require('fs');
 const { WebhookClient } = require('discord.js');
 const changelogLink = 'https://github.com/Chatterino/chatterino2/blob/master/CHANGELOG.md';
 const nightlyLink = 'https://github.com/Chatterino/chatterino2/releases/tag/nightly-build';
-const nightlyOsxLink = 'https://github.com/Chatterino/chatterino2/releases/download/nightly-build/chatterino-osx.dmg';
-const nightlyWinLink = 'https://github.com/Chatterino/chatterino2/releases/download/nightly-build/chatterino-windows-x86-64.zip';
-const nightlyAppImageLink = 'https://github.com/Chatterino/chatterino2/releases/download/nightly-build/Chatterino-x86_64.AppImage';
-const nightlyDebLink = 'https://github.com/Chatterino/chatterino2/releases/download/nightly-build/Chatterino-x86_64.deb';
 fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res.text()).then(text => {
 	return xml2js.parseStringPromise(text);
 }).then(xmlObj => {
@@ -35,7 +31,7 @@ fetch('https://github.com/Chatterino/chatterino2/releases.atom').then(res => res
 					webhookClient.send({
 						username: 'Chatterino Nightly',
 						avatarURL: 'https://camo.githubusercontent.com/6ca305d42786c9dbd0b76f5ade013601b080d71a598e881b4349dff2eafae6c7/68747470733a2f2f666f757274662e636f6d2f696d672f63686174746572696e6f2d69636f6e2d36342e706e67',
-						content: `New Nightly Version (Updated: <t:${timestamp}>):\nLatest Commit Message: \`\`${latestCommit['title'][0].trim()}\`\` by \`\`${latestCommit['author'][0]['name'][0].trim()}\`\`\nChangelog: <${changelogLink}>\nLink: <${nightlyLink}>\nOSX: <${nightlyOsxLink}>\nWindows: <${nightlyWinLink}>\nAppImage: <${nightlyAppImageLink}>\nDebian: <${nightlyDebLink}>`
+						content: `New Nightly Version (Updated: <t:${timestamp}:F>):\nLatest Commit Message: \`\`${latestCommit['title'][0].trim()}\`\` by \`\`${latestCommit['author'][0]['name'][0].trim()}\`\`\nChangelog: <${changelogLink}>\nLink: <${nightlyLink}>`
 					}).catch(err => console.error(err));
 				} else {
 					console.log('Already latest version!');
