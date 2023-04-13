@@ -33,7 +33,7 @@
                             if (File.Exists("lastUpdatedValue"))
                             {
                                 string lastUpdatedValue = File.ReadAllText("lastUpdatedValue");
-                                if (lastUpdatedValue.Trim().Equals(updated.Trim())) { // TODO: Invert
+                                if (!lastUpdatedValue.Trim().Equals(updated.Trim())) {
                                     XmlDocument commits = new XmlDocument();
                                     commits.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/master.atom"));
                                     foreach (XmlNode commit in commits.DocumentElement!.ChildNodes) {
