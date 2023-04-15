@@ -12,7 +12,7 @@
         public const string WEBHOOK_AVATAR_URL = "https://camo.githubusercontent.com/6ca305d42786c9dbd0b76f5ade013601b080d71a598e881b4349dff2eafae6c7/68747470733a2f2f666f757274662e636f6d2f696d672f63686174746572696e6f2d69636f6e2d36342e706e67";
         public const string CHANGELOG_LINK = "https://github.com/Chatterino/chatterino2/blob/master/CHANGELOG.md";
         public const string NIGHTLY_LINK = "https://github.com/Chatterino/chatterino2/releases/tag/nightly-build";
-        public const string CONTENT_FORMAT_STRING = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by ``{2}``\nChangelog: <{3}>\nLink: <{3}>";
+        public const string CONTENT_FORMAT_STRING = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by ``{2}``\nChangelog: <{3}>\nLink: <{4}>";
         public static async Task Main(string[] args)
         {
             DotEnv.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
