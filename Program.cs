@@ -21,7 +21,7 @@
             {
                 doc.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/nightly-build.atom"));
                 DateTime dt = DateTime.Now.AddDays(-1);
-                string updated = doc.GetElementsByTagName("updated")[0].InnerText;
+                string updated = doc.GetElementsByTagName("updated")[0]!.InnerText;
                 DateTime updatedDate = DateTime.Parse(updated);
                 long timestamp = ((DateTimeOffset)updatedDate).ToUnixTimeSeconds();
                 Console.WriteLine(updated + " - " + timestamp);
@@ -38,7 +38,7 @@
                     else
                     {
                         Console.WriteLine("Needs update");
-                        XmlNode entry = doc.GetElementsByTagName("entry")[0];
+                        XmlNode entry = doc.GetElementsByTagName("entry")[0]!;
                         string title = "N/A";
                         string author = "N/A";
                         foreach (XmlNode node in entry.ChildNodes)
