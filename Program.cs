@@ -20,7 +20,6 @@
             using (HttpClient client = new HttpClient())
             {
                 doc.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/nightly-build.atom"));
-                DateTime dt = DateTime.Now.AddDays(-1);
                 string updated = doc.GetElementsByTagName("updated")[0]!.InnerText;
                 DateTime updatedDate = DateTime.Parse(updated);
                 long timestamp = ((DateTimeOffset)updatedDate).ToUnixTimeSeconds();
