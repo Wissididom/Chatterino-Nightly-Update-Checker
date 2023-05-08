@@ -19,53 +19,57 @@
             XmlDocument doc = new XmlDocument();
             using (HttpClient client = new HttpClient())
             {
-                doc.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/releases.atom"));
-                foreach (XmlNode entry in doc.DocumentElement!.ChildNodes)
+                doc.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/nightly-build.atom"));
+                DateTime dt = DateTime.Now.AddDays(-1);
+                string updated = doc.GetElementsByTagName("updated")[0].InnerText;
+                DateTime updatedDate = DateTime.Parse(updated);
+                long timestamp = ((DateTimeOffset)updatedDate).ToUnixTimeSeconds();
+                Console.WriteLine(updated + " - " + timestamp);
+                bool fileNeedsUpdate = true;
+                if (File.Exists("lastUpdatedValue"))
                 {
-                    if (entry.Name == "entry")
+                    string lastUpdatedValue = File.ReadAllText("lastUpdatedValue");
+                    Console.WriteLine(lastUpdatedValue);
+                    if (lastUpdatedValue.Trim().Equals(updated.Trim()))
                     {
-                        if (entry["title"]!.InnerText == "Nightly Release")
+                        Console.WriteLine("Already latest version");
+                        fileNeedsUpdate = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Needs update");
+                        XmlNode entry = doc.GetElementsByTagName("entry")[0];
+                        string title = "N/A";
+                        string author = "N/A";
+                        foreach (XmlNode node in entry.ChildNodes)
                         {
-                            DateTime dt = DateTime.Now.AddDays(-1);
-                            string updated = entry["updated"]!.InnerText.Trim();
-                            DateTime updatedDate = DateTime.Parse(updated);
-                            long timestamp = ((DateTimeOffset)updatedDate).ToUnixTimeSeconds();
-                            if (File.Exists("lastUpdatedValue"))
+                            if (node.Name == "title") title = node.InnerText.Trim();
+                            if (node.Name == "author")
                             {
-                                string lastUpdatedValue = File.ReadAllText("lastUpdatedValue");
-                                if (!lastUpdatedValue.Trim().Equals(updated.Trim())) {
-                                    XmlDocument commits = new XmlDocument();
-                                    commits.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/master.atom"));
-                                    foreach (XmlNode commit in commits.DocumentElement!.ChildNodes) {
-                                        if (commit.Name == "entry") {
-                                            string title = commit["title"]!.InnerText.Trim(); // Latest Commit Title
-                                            XmlNode? authorNameNode = null;
-                                            foreach (XmlNode a in commit["author"]!.ChildNodes) {
-                                                if (a.Name == "name") authorNameNode = a;
-                                            }
-                                            string author = authorNameNode!.InnerText.Trim(); // Latest Commit Author
-                                            WebhookData webhookData = new WebhookData{
-                                                Username = WEBHOOK_USERNAME,
-                                                AvatarUrl = WEBHOOK_AVATAR_URL,
-                                                AllowedMentions = new Dictionary<string, string[]>{
-                                                    { "parse", new string[0] }
-                                                },
-                                                Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, CHANGELOG_LINK, NIGHTLY_LINK)
-                                            };
-                                            Console.WriteLine(client.PostAsync($"{Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL")}?wait=true", new StringContent(JsonSerializer.Serialize<WebhookData>(webhookData), Encoding.UTF8, "application/json")).Result.StatusCode);
-                                            break;
-                                        }
-                                    }
+                                foreach (XmlNode option in node.ChildNodes)
+                                {
+                                    if (option.Name == "name") author = option.InnerText.Trim();
                                 }
                             }
-                            else
-                            {
-                                Console.WriteLine("Already latest version!");
-                            }
-                            File.WriteAllText("lastUpdatedValue", updated);
                         }
+                        Console.WriteLine("timestamp:" + timestamp + "\nTitle:" + title + "\nAuthor:" + author);
+                        WebhookData webhookData = new WebhookData
+                        {
+                            Username = WEBHOOK_USERNAME,
+                            AvatarUrl = WEBHOOK_AVATAR_URL,
+                            AllowedMentions = new Dictionary<string, string[]>{
+                                { "parse", new string[0] }
+                            },
+                            Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, CHANGELOG_LINK, NIGHTLY_LINK)
+                        };
+                        Console.WriteLine(client.PostAsync($"{Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL")}?wait=true", new StringContent(JsonSerializer.Serialize<WebhookData>(webhookData), Encoding.UTF8, "application/json")).Result.StatusCode);
                     }
                 }
+                else
+                {
+                    Console.WriteLine("File does not exist");
+                }
+                if (fileNeedsUpdate) File.WriteAllText("lastUpdatedValue", updated);
             }
         }
     }
