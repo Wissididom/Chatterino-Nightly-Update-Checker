@@ -24,12 +24,10 @@
                 string updated = doc.GetElementsByTagName("updated")[0]!.InnerText;
                 DateTime updatedDate = DateTime.Parse(updated);
                 long timestamp = ((DateTimeOffset)updatedDate).ToUnixTimeSeconds();
-                Console.WriteLine(updated + " - " + timestamp);
                 bool fileNeedsUpdate = true;
                 if (File.Exists("lastUpdatedValue"))
                 {
                     string lastUpdatedValue = File.ReadAllText("lastUpdatedValue");
-                    Console.WriteLine(lastUpdatedValue);
                     if (lastUpdatedValue.Trim().Equals(updated.Trim()))
                     {
                         Console.WriteLine("Already latest version");
