@@ -52,7 +52,6 @@
                                 }
                             }
                         }
-                        Console.WriteLine("timestamp:" + timestamp + "\nTitle:" + title + "\nAuthor:" + author);
                         WebhookData webhookData = new WebhookData
                         {
                             Username = WEBHOOK_USERNAME,
