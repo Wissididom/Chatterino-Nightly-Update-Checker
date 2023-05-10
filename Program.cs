@@ -73,7 +73,7 @@
                 },
                 Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, CHANGELOG_LINK, NIGHTLY_LINK)
             };
-            return client.PostAsync(url, new StringContent(JsonSerializer.Serialize<WebhookData>(webhookData), Encoding.UTF8, "application/json"));
+            return await client.PostAsync(url, new StringContent(JsonSerializer.Serialize<WebhookData>(webhookData), Encoding.UTF8, "application/json"));
         }
     }
 }
