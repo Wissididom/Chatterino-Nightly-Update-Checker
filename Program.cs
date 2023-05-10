@@ -17,9 +17,9 @@
         public static async Task Main(string[] args)
         {
             DotEnv.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-            XmlDocument doc = new XmlDocument();
             using (HttpClient client = new HttpClient())
             {
+                XmlDocument doc = new XmlDocument();
                 doc.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/nightly-build.atom"));
                 string updated = doc.GetElementsByTagName("updated")[0]!.InnerText;
                 DateTime updatedDate = DateTime.Parse(updated);
