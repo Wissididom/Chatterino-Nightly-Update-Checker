@@ -61,7 +61,7 @@
             }
         }
         
-        private async Task<HttpResponseMessage> PostDiscordMessage(HttpClient client, long timestamp, string title, string author)
+        private static async Task<HttpResponseMessage> PostDiscordMessage(HttpClient client, long timestamp, string title, string author)
         {
             string url = $"{Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL")}?wait=true";
             WebhookData webhookData = new WebhookData
