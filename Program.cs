@@ -13,12 +13,13 @@
         public const string CHANGELOG_LINK = "https://github.com/Chatterino/chatterino2/blob/master/CHANGELOG.md";
         public const string NIGHTLY_LINK = "https://github.com/Chatterino/chatterino2/releases/tag/nightly-build";
         public const string CONTENT_FORMAT_STRING = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by ``{2}``\nChangelog: <{3}>\nLink: <{4}>";
+
         public static async Task Main(string[] args)
         {
             DotEnv.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-            XmlDocument doc = new XmlDocument();
             using (HttpClient client = new HttpClient())
             {
+                XmlDocument doc = new XmlDocument();
                 doc.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/nightly-build.atom"));
                 string updated = doc.GetElementsByTagName("updated")[0]!.InnerText;
                 DateTime updatedDate = DateTime.Parse(updated);
@@ -49,16 +50,7 @@
                                 }
                             }
                         }
-                        WebhookData webhookData = new WebhookData
-                        {
-                            Username = WEBHOOK_USERNAME,
-                            AvatarUrl = WEBHOOK_AVATAR_URL,
-                            AllowedMentions = new Dictionary<string, string[]>{
-                                { "parse", new string[0] }
-                            },
-                            Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, CHANGELOG_LINK, NIGHTLY_LINK)
-                        };
-                        Console.WriteLine(client.PostAsync($"{Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL")}?wait=true", new StringContent(JsonSerializer.Serialize<WebhookData>(webhookData), Encoding.UTF8, "application/json")).Result.StatusCode);
+                        Console.WriteLine((await PostDiscordMessage(client, timestamp, title, author)).StatusCode);
                     }
                 }
                 else
@@ -67,6 +59,23 @@
                 }
                 if (fileNeedsUpdate) File.WriteAllText("lastUpdatedValue", updated);
             }
+        }
+        
+        private static async Task<HttpResponseMessage> PostDiscordMessage(HttpClient client, long timestamp, string title, string author)
+        {
+            string url = $"{Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL")}?wait=true";
+            WebhookData webhookData = new WebhookData
+            {
+                Username = WEBHOOK_USERNAME,
+                AvatarUrl = WEBHOOK_AVATAR_URL,
+                AllowedMentions = new Dictionary<string, string[]>{
+                    { "parse", new string[0] }
+                },
+                Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, CHANGELOG_LINK, NIGHTLY_LINK)
+            };
+            string webhookJson = JsonSerializer.Serialize<WebhookData>(webhookData);
+            StringContent content = new StringContent(webhookJson, Encoding.UTF8, "application/json");
+            return await client.PostAsync(url, content);
         }
     }
 }
