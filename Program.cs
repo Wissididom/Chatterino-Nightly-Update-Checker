@@ -50,7 +50,8 @@
                                 }
                             }
                         }
-                        Console.WriteLine((await PostDiscordMessage(client, timestamp, title, author)).StatusCode);
+                        if (author != "dependabot")
+                            Console.WriteLine((await PostDiscordMessage(client, timestamp, title, author)).StatusCode);
                     }
                 }
                 else
