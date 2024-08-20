@@ -10,9 +10,8 @@
     {
         public const string WEBHOOK_USERNAME = "Chatterino Nightly";
         public const string WEBHOOK_AVATAR_URL = "https://user-images.githubusercontent.com/41973452/272541622-52457e89-5f16-4c83-93e7-91866c25b606.png";
-        public const string CHANGELOG_LINK = "https://github.com/Chatterino/chatterino2/blob/master/CHANGELOG.md";
         public const string NIGHTLY_LINK = "https://github.com/Chatterino/chatterino2/releases/tag/nightly-build";
-        public const string CONTENT_FORMAT_STRING = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by ``{2}``\nChangelog: <{3}>\nLink: <{4}>";
+        public const string CONTENT_FORMAT_STRING = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by ``{2}``\nLink: <{3}>";
 
         public static async Task Main(string[] args)
         {
@@ -72,7 +71,7 @@
                 AllowedMentions = new Dictionary<string, string[]>{
                     { "parse", new string[0] }
                 },
-                Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, CHANGELOG_LINK, NIGHTLY_LINK)
+                Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, NIGHTLY_LINK)
             };
             string webhookJson = JsonSerializer.Serialize<WebhookData>(webhookData);
             StringContent content = new StringContent(webhookJson, Encoding.UTF8, "application/json");
