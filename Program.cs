@@ -96,12 +96,13 @@
                             {
                                 if (first)
                                 {
-                                    author += $"``{coauthor}``, ";
+                                    author += $"``{coauthor}``";
                                 }
                                 else
                                 {
-                                    author += $"``{coauthor}``";
+                                    author += $", ``{coauthor}``";
                                 }
+                                first = false;
                             }
                             author += ")";
                         }
