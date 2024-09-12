@@ -88,7 +88,7 @@
                                 author = $"[{authorName}](<{authorUrl}>)";
                             }
                         }
-                        if (coauthors.Length > 0)
+                        if (coauthors.Count > 0)
                         {
                             author += " (with ";
                             bool first = true;
