@@ -59,7 +59,7 @@
                                     if (line.StartsWith("Co-authored-by:"))
                                     {
                                         string coauthor = line.Substring("Co-authored-by:".Length);
-                                        coauthor = coauthor.Substring(0, coauthor.IndexOf('<')).Trim();
+                                        coauthor = coauthor.Substring(0, coauthor.IndexOf("&lt;")).Trim();
                                         coauthors.Add(coauthor);
                                     }
                                 }
