@@ -106,7 +106,7 @@
                             }
                             author += ")";
                         }
-                        if (author != "dependabot")
+                        if (authorName != "dependabot")
                             Console.WriteLine((await PostDiscordMessage(client, timestamp, title, author)).StatusCode);
                     }
                 }
