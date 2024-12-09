@@ -42,14 +42,14 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           cd bin/Release/net8.0/linux-x64/publish
-          zip -r Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip *
+          zip -r ../../../../../Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip *
           cd ../../../../..
         shell: bash
       - name: Compress (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           cd bin/Release/net8.0/osx-arm64/publish
-          zip -r Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip *
+          zip -r ../../../../../Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip *
           cd ../../../../..
         shell: bash
       - name: Compress (Windows)
