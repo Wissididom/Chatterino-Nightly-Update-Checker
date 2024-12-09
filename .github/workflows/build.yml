@@ -1,4 +1,6 @@
 name: Build
+permissions:
+  "contents": "write"
 
 on:
   push:
@@ -32,3 +34,56 @@ jobs:
         run: dotnet build --configuration Release --no-restore
       - name: Test
         run: dotnet test --no-restore --verbosity normal
+      - name: Publish
+        run: dotnet publish --configuration Release --no-restore
+      - name: Compress (Ubuntu and macOS)
+        if: matrix.os != 'windows-latest'
+        run: zip -r Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip Chatterino-Nightly-Update-Checker/bin/Release/net8.0/publish
+        shell: bash
+      - name: Compress (Windows)
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path Chatterino-Nightly-Update-Checker/bin/Release/net8.0/publish\* -DestinationPath Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip
+        shell: pwsh
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chatterino-Nightly-Update-Checker-${{ matrix.os }}
+          path: Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip
+  create-release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # allows for tags access
+      - uses: actions/download-artifact@v4
+        name: Download Windows build
+        with:
+          name: Chatterino-Nightly-Update-Checker-windows-latest
+          path: release-artifacts/
+      - uses: actions/download-artifact@v4
+        name: Download MacOS build
+        with:
+          name: Chatterino-Nightly-Update-Checker-macos-latest
+          path: release-artifacts/
+      - uses: actions/download-artifact@v4
+        name: Download Ubuntu build
+        with:
+          name: Chatterino-Nightly-Update-Checker-ubuntu-latest
+          path: release-artifacts/
+      - name: Create release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          replacesArtifacts: true
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "release-artifacts/*"
+          body: ${{ github.event.head_commit.message }}
+          prerelease: true
+          name: Nightly Release
+          tag: nightly-build
+      - name: Update nightly-build tag
+        run: |
+          git tag -f nightly-build
+          git push -f origin nightly-build
