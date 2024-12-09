@@ -36,8 +36,6 @@ jobs:
         run: dotnet test --no-restore --verbosity normal
       - name: Publish
         run: dotnet publish --configuration Release --no-restore
-      - name: List published files
-        run: ls bin/Release/net8.0
       - name: Compress (Ubuntu and macOS)
         if: matrix.os == 'ubuntu-latest'
         run: |
