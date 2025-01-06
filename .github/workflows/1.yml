@@ -12,8 +12,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Restore lastUpdatedValue
-        uses: actions/cache@v4
+      - name: Restore lastUpdatedValue cache
+        id: cache-restore
+        uses: actions/cache/restore@v4
         with:
           path: lastUpdatedValue
           key: last-updated-value-cache-1
@@ -27,8 +28,14 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL_1 }}
         run: dotnet run
-      - name: Save lastUpdatedValue
-        uses: actions/cache@v4
+      - name: Delete lastUpdatedValue cache
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh extension install actions/gh-actions-cache
+          gh actions-cache delete last-updated-value-cache-1 --confirm
+      - name: Save lastUpdatedValue cache
+        uses: actions/cache/save@v4
         with:
           path: lastUpdatedValue
           key: last-updated-value-cache-1
