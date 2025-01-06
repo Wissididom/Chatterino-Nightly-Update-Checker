@@ -35,6 +35,8 @@ jobs:
         run: |
           gh extension install actions/gh-actions-cache
           gh actions-cache delete last-updated-value-cache-1 --confirm
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Save lastUpdatedValue cache
         uses: actions/cache/save@v4
         with:
