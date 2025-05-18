@@ -6,13 +6,14 @@
     using System.Xml;
     using System.Text;
     using System.Text.Json;
+    using System.Text.RegularExpressions;
 
     public static class Program
     {
         public const string WEBHOOK_USERNAME = "Chatterino Nightly";
         public const string WEBHOOK_AVATAR_URL = "https://user-images.githubusercontent.com/41973452/272541622-52457e89-5f16-4c83-93e7-91866c25b606.png";
         public const string NIGHTLY_LINK = "https://github.com/Chatterino/chatterino2/releases/tag/nightly-build";
-        public const string CONTENT_FORMAT_STRING = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by {2}\nLink: <{3}>";
+        public const string CONTENT_FORMAT_STRING = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by {2}\nLink: <{3}>\nPull Request: {4}";
 
         public static async Task Main(string[] args)
         {
@@ -121,6 +122,15 @@
         private static async Task<HttpResponseMessage> PostDiscordMessage(HttpClient client, long timestamp, string title, string author)
         {
             string url = $"{Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL")}?wait=true";
+            string pr = "`N/A`";
+            Regex pattern = new Regex(@"\(#(\d+)\)$");
+            Match match = pattern.Match(title);
+            if (match.Success)
+            {
+                string prNumber = match.Groups[1].Value;
+                pr = $"[#{prNumber}](<https://github.com/Chatterino/chatterino2/pull/{prNumber}>)";
+            }
+            Console.WriteLine(String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, NIGHTLY_LINK, pr));
             WebhookData webhookData = new WebhookData
             {
                 Username = WEBHOOK_USERNAME,
@@ -128,7 +138,7 @@
                 AllowedMentions = new Dictionary<string, string[]>{
                     { "parse", new string[0] }
                 },
-                Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, NIGHTLY_LINK)
+                Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, NIGHTLY_LINK, pr)
             };
             string webhookJson = JsonSerializer.Serialize<WebhookData>(webhookData);
             StringContent content = new StringContent(webhookJson, Encoding.UTF8, "application/json");
