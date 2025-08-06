@@ -67,17 +67,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # allows for tags access
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Download Windows build
         with:
           name: Chatterino-Nightly-Update-Checker-windows-latest
           path: release-artifacts/
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Download MacOS build
         with:
           name: Chatterino-Nightly-Update-Checker-macos-latest
           path: release-artifacts/
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Download Ubuntu build
         with:
           name: Chatterino-Nightly-Update-Checker-ubuntu-latest
