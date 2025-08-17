@@ -1,4 +1,4 @@
-namespace ChatterinoNightlyUpdateCheckerForDiscord
+namespace ChatterinoNightlyUpdateChecker
 {
     using System;
     using System.IO;

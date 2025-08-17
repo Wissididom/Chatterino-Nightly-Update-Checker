@@ -1,4 +1,4 @@
-﻿namespace ChatterinoNightlyUpdateCheckerForDiscord
+﻿namespace ChatterinoNightlyUpdateChecker
 {
     using System;
     using System.Collections.Generic;
@@ -8,141 +8,130 @@
     using System.Text.Json;
     using System.Text.RegularExpressions;
 
-    public static class Program
+    public static partial class Program
     {
-        public const string WEBHOOK_USERNAME = "Chatterino Nightly";
-        public const string WEBHOOK_AVATAR_URL = "https://user-images.githubusercontent.com/41973452/272541622-52457e89-5f16-4c83-93e7-91866c25b606.png";
-        public const string NIGHTLY_LINK = "https://github.com/Chatterino/chatterino2/releases/tag/nightly-build";
-        public const string CONTENT_FORMAT_STRING = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by {2}\nLink: <{3}>\nPull Request: {4}";
+        private const string WebhookUsername = "Chatterino Nightly";
+        private const string WebhookAvatarUrl = "https://user-images.githubusercontent.com/41973452/272541622-52457e89-5f16-4c83-93e7-91866c25b606.png";
+        private const string NightlyLink = "https://github.com/Chatterino/chatterino2/releases/tag/nightly-build";
+        private const string ContentFormatString = "New Nightly Version (Updated: <t:{0}:F>):\nLatest Commit Message: ``{1}`` by {2}\nLink: <{3}>\nPull Request: {4}";
 
         public static async Task Main(string[] args)
         {
             DotEnv.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-            using (HttpClient client = new HttpClient())
+            using var client = new HttpClient();
+            var doc = new XmlDocument();
+            doc.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/nightly-build.atom").ConfigureAwait(false));
+            var updated = doc.GetElementsByTagName("updated")[0]!.InnerText;
+            var updatedDate = DateTime.Parse(updated);
+            var timestamp = ((DateTimeOffset)updatedDate).ToUnixTimeSeconds();
+            var fileNeedsUpdate = true;
+            if (File.Exists("lastUpdatedValue"))
             {
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(await client.GetStringAsync("https://github.com/Chatterino/chatterino2/commits/nightly-build.atom"));
-                string updated = doc.GetElementsByTagName("updated")[0]!.InnerText;
-                DateTime updatedDate = DateTime.Parse(updated);
-                long timestamp = ((DateTimeOffset)updatedDate).ToUnixTimeSeconds();
-                bool fileNeedsUpdate = true;
-                if (File.Exists("lastUpdatedValue"))
+                var lastUpdatedValue = await File.ReadAllTextAsync("lastUpdatedValue").ConfigureAwait(false);
+                if (lastUpdatedValue.Trim().Equals(updated.Trim()))
                 {
-                    string lastUpdatedValue = File.ReadAllText("lastUpdatedValue");
-                    if (lastUpdatedValue.Trim().Equals(updated.Trim()))
-                    {
-                        Console.WriteLine("Already latest version");
-                        fileNeedsUpdate = false;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Needs update");
-                        XmlNode entry = doc.GetElementsByTagName("entry")[0]!;
-                        string title = "N/A";
-                        string? authorName = null;
-                        string? authorUrl = null;
-                        List<string> coauthors = new List<string>();
-                        foreach (XmlNode node in entry.ChildNodes)
-                        {
-                            if (node.Name == "title") title = node.InnerText.Trim();
-                            if (node.Name == "author")
-                            {
-                                foreach (XmlNode option in node.ChildNodes)
-                                {
-                                    if (option.Name == "name") authorName = option.InnerText.Trim();
-                                    if (option.Name == "uri") authorUrl = option.InnerText.Trim();
-                                }
-                            }
-                            if (node.Name == "content")
-                            {
-                                foreach (string line in node.InnerText.Split('\n'))
-                                {
-                                    if (line.StartsWith("Co-authored-by:"))
-                                    {
-                                        string coauthor = line.Substring("Co-authored-by:".Length);
-                                        coauthor = coauthor.Substring(0, coauthor.IndexOf("&lt;")).Trim();
-                                        coauthors.Add(coauthor);
-                                    }
-                                }
-                            }
-                        }
-                        string? author = null;
-                        if (authorName is null)
-                        {
-                            if (authorUrl is null)
-                            {
-                                author = "N/A";
-                            }
-                            else
-                            {
-                                author = $"<{authorUrl}>";
-                            }
-                        }
-                        else
-                        {
-                            if (authorUrl is null)
-                            {
-                                author = $"``{authorName}``";
-                            }
-                            else
-                            {
-                                author = $"[{authorName}](<{authorUrl}>)";
-                            }
-                        }
-                        if (coauthors.Count > 0)
-                        {
-                            author += " (with ";
-                            bool first = true;
-                            foreach (string coauthor in coauthors)
-                            {
-                                if (first)
-                                {
-                                    author += $"``{coauthor}``";
-                                }
-                                else
-                                {
-                                    author += $", ``{coauthor}``";
-                                }
-                                first = false;
-                            }
-                            author += ")";
-                        }
-                        if (authorName != "dependabot")
-                            Console.WriteLine((await PostDiscordMessage(client, timestamp, title, author)).StatusCode);
-                    }
+                    Console.WriteLine("Already latest version");
+                    fileNeedsUpdate = false;
                 }
                 else
                 {
-                    Console.WriteLine("File does not exist");
+                    Console.WriteLine("Needs update");
+                    var entry = doc.GetElementsByTagName("entry")[0]!;
+                    var title = "N/A";
+                    string? authorName = null;
+                    string? authorUrl = null;
+                    var coauthors = new List<string>();
+                    foreach (XmlNode node in entry.ChildNodes)
+                    {
+                        switch (node.Name)
+                        {
+                            case "title":
+                                title = node.InnerText.Trim();
+                                goto case "author";
+                            case "author":
+                                foreach (XmlNode option in node.ChildNodes)
+                                {
+                                    switch (option.Name)
+                                    {
+                                        case "name":
+                                            authorName = option.InnerText.Trim();
+                                            break;
+                                        case "uri":
+                                            authorUrl = option.InnerText.Trim();
+                                            break;
+                                    }
+                                }
+                                break;
+                            case "content":
+                                coauthors.AddRange(from line in node.InnerText.Split('\n') where line.StartsWith("Co-authored-by:") select line["Co-authored-by:".Length..] into coauthor select coauthor[..coauthor.IndexOf("&lt;", StringComparison.InvariantCulture)].Trim());
+                                break;
+                        }
+                    }
+                    string? author;
+                    if (authorName is null)
+                    {
+                        author = authorUrl is null ? "N/A" : $"<{authorUrl}>";
+                    }
+                    else
+                    {
+                        author = authorUrl is null ? $"``{authorName}``" : $"[{authorName}](<{authorUrl}>)";
+                    }
+                    if (coauthors.Count > 0)
+                    {
+                        author += " (with ";
+                        bool first = true;
+                        foreach (string coauthor in coauthors)
+                        {
+                            if (first)
+                            {
+                                author += $"``{coauthor}``";
+                            }
+                            else
+                            {
+                                author += $", ``{coauthor}``";
+                            }
+                            first = false;
+                        }
+                        author += ")";
+                    }
+                    if (authorName != "dependabot")
+                        Console.WriteLine((await PostDiscordMessage(client, timestamp, title, author)).StatusCode);
                 }
-                if (fileNeedsUpdate) File.WriteAllText("lastUpdatedValue", updated);
             }
+            else
+            {
+                Console.WriteLine("File does not exist");
+            }
+            if (fileNeedsUpdate) await File.WriteAllTextAsync("lastUpdatedValue", updated);
         }
 
         private static async Task<HttpResponseMessage> PostDiscordMessage(HttpClient client, long timestamp, string title, string author)
         {
-            string url = $"{Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL")}?wait=true";
-            string pr = "`N/A`";
-            Regex pattern = new Regex(@"\(#(\d+)\)$");
-            Match match = pattern.Match(title);
+            var url = $"{Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL")}?wait=true";
+            var pr = "`N/A`";
+            var pattern = PrNumberRegex();
+            var match = pattern.Match(title);
             if (match.Success)
             {
-                string prNumber = match.Groups[1].Value;
+                var prNumber = match.Groups[1].Value;
                 pr = $"[#{prNumber}](<https://github.com/Chatterino/chatterino2/pull/{prNumber}>)";
             }
-            Console.WriteLine(String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, NIGHTLY_LINK, pr));
-            WebhookData webhookData = new WebhookData
+            Console.WriteLine(ContentFormatString, timestamp, title, author, NightlyLink, pr);
+            var webhookData = new WebhookData
             {
-                Username = WEBHOOK_USERNAME,
-                AvatarUrl = WEBHOOK_AVATAR_URL,
+                Username = WebhookUsername,
+                AvatarUrl = WebhookAvatarUrl,
                 AllowedMentions = new Dictionary<string, string[]>{
-                    { "parse", new string[0] }
+                    { "parse", [] }
                 },
-                Content = String.Format(CONTENT_FORMAT_STRING, timestamp, title, author, NIGHTLY_LINK, pr)
+                Content = string.Format(ContentFormatString, timestamp, title, author, NightlyLink, pr)
             };
-            string webhookJson = JsonSerializer.Serialize<WebhookData>(webhookData);
-            StringContent content = new StringContent(webhookJson, Encoding.UTF8, "application/json");
+            var webhookJson = JsonSerializer.Serialize(webhookData);
+            var content = new StringContent(webhookJson, Encoding.UTF8, "application/json");
             return await client.PostAsync(url, content);
         }
+
+        [GeneratedRegex(@"\(#(\d+)\)$")]
+        private static partial Regex PrNumberRegex();
     }
 }
