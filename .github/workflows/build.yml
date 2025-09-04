@@ -83,7 +83,7 @@ jobs:
           name: Chatterino-Nightly-Update-Checker-ubuntu-latest
           path: release-artifacts/
       - name: Create release
-        uses: ncipollo/release-action@v1.19.1
+        uses: ncipollo/release-action@v1.20.0
         with:
           replacesArtifacts: true
           allowUpdates: true
