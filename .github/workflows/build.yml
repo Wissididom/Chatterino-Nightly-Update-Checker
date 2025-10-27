@@ -55,7 +55,7 @@ jobs:
         run: Compress-Archive -Path bin/Release/net8.0/win-x64/publish/* -DestinationPath Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip
         shell: pwsh
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Chatterino-Nightly-Update-Checker-${{ matrix.os }}
           path: Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip
