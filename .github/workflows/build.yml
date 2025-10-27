@@ -34,8 +34,7 @@ jobs:
           ./build-windows.sh
           ./build-macos.sh
           mkdir release-artifacts
-      - name: Compress (Ubuntu and macOS)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Compress
         run: |
           zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-x64.zip bin/Release/net8.0/linux-x64/publish/*
           zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-musl-x64.zip bin/Release/net8.0/linux-musl-x64/publish/*
@@ -51,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: Chatterino-Nightly-Update-Checker
-          path: release-artifacts/*
+          path: release-artifacts
   create-release:
     needs: [build]
     runs-on: ubuntu-latest
