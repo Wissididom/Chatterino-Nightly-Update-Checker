@@ -15,19 +15,13 @@ concurrency:
 
 jobs:
   build:
-
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        dotnet-version: [ '8.0.x' ]
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - name: Setup .NET SDK ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+          dotnet-version: '8.0.x'
       - name: Install dependencies
         run: dotnet restore
       - name: Build
@@ -35,30 +29,28 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
       - name: Publish
-        run: dotnet publish --configuration Release --no-restore
-      - name: Compress (Ubuntu and macOS)
-        if: matrix.os == 'ubuntu-latest'
         run: |
-          cd bin/Release/net8.0/linux-x64/publish
-          zip -r ../../../../../Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip *
-          cd ../../../../..
-        shell: bash
-      - name: Compress (macOS)
-        if: matrix.os == 'macos-latest'
+          ./build-linux.sh
+          ./build-windows.sh
+          ./build-macos.sh
+          mkdir release-artifacts
+      - name: Compress
         run: |
-          cd bin/Release/net8.0/osx-arm64/publish
-          zip -r ../../../../../Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip *
-          cd ../../../../..
-        shell: bash
-      - name: Compress (Windows)
-        if: matrix.os == 'windows-latest'
-        run: Compress-Archive -Path bin/Release/net8.0/win-x64/publish/* -DestinationPath Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip
-        shell: pwsh
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-x64.zip bin/Release/net8.0/linux-x64/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-musl-x64.zip bin/Release/net8.0/linux-musl-x64/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-musl-arm64.zip bin/Release/net8.0/linux-musl-arm64/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-arm.zip bin/Release/net8.0/linux-arm/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-arm64.zip bin/Release/net8.0/linux-arm64/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-win-x64.zip bin/Release/net8.0/win-x64/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-win-x86.zip bin/Release/net8.0/win-x86/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-win-arm64.zip bin/Release/net8.0/win-arm64/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-macos-x64.zip bin/Release/net8.0/osx-x64/publish/*
+          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-macos-arm64.zip bin/Release/net8.0/osx-arm64/publish/*
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
-          name: Chatterino-Nightly-Update-Checker-${{ matrix.os }}
-          path: Chatterino-Nightly-Update-Checker-${{ matrix.os }}.zip
+          name: Chatterino-Nightly-Update-Checker
+          path: release-artifacts
   create-release:
     needs: [build]
     runs-on: ubuntu-latest
@@ -68,19 +60,9 @@ jobs:
         with:
           fetch-depth: 0 # allows for tags access
       - uses: actions/download-artifact@v6
-        name: Download Windows build
+        name: Download artifact
         with:
-          name: Chatterino-Nightly-Update-Checker-windows-latest
-          path: release-artifacts/
-      - uses: actions/download-artifact@v6
-        name: Download MacOS build
-        with:
-          name: Chatterino-Nightly-Update-Checker-macos-latest
-          path: release-artifacts/
-      - uses: actions/download-artifact@v6
-        name: Download Ubuntu build
-        with:
-          name: Chatterino-Nightly-Update-Checker-ubuntu-latest
+          name: Chatterino-Nightly-Update-Checker
           path: release-artifacts/
       - name: Create release
         uses: ncipollo/release-action@v1.20.0
