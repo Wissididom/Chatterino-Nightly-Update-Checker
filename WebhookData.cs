@@ -1,7 +1,7 @@
+using System.Text.Json.Serialization;
+
 namespace ChatterinoNightlyUpdateChecker
 {
-    using System.Text.Json.Serialization;
-
     public class WebhookData
     {
         [JsonPropertyName("username")]
