@@ -122,7 +122,6 @@ namespace ChatterinoNightlyUpdateChecker
 
         private static string HtmlToPlainText(string html)
         {
-            Console.WriteLine(html);
             var plainTextMatch = PreHtmlRegex().Match(html);
             return plainTextMatch.Success ? HttpUtility.HtmlDecode(plainTextMatch.Groups[1].Value.Trim()) : html;
         }
