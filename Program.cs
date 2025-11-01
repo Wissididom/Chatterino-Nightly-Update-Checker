@@ -1,15 +1,11 @@
-﻿using System.Web;
+﻿using System.Xml;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Web;
 
 namespace ChatterinoNightlyUpdateChecker
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Xml;
-    using System.Text;
-    using System.Text.Json;
-    using System.Text.RegularExpressions;
-
     public static partial class Program
     {
         private const string WebhookUsername = "Chatterino Nightly";
