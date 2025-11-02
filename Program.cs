@@ -88,7 +88,7 @@ namespace ChatterinoNightlyUpdateChecker
                         }
                         author += ")";
                     }
-                    if (authorName != "dependabot")
+                    if (authorName != "dependabot" && authorName != "dependabot[bot]")
                         Console.WriteLine((await PostDiscordMessage(client, timestamp, commitString, author, description)).StatusCode);
                 }
                 if (fileNeedsUpdate) await File.WriteAllTextAsync("lastUpdatedValue", timestamp);
