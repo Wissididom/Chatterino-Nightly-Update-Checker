@@ -21,7 +21,7 @@ jobs:
       - name: Setup .NET SDK ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
       - name: Install dependencies
         run: dotnet restore
       - name: Build
@@ -36,16 +36,16 @@ jobs:
           mkdir release-artifacts
       - name: Compress
         run: |
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-x64.zip bin/Release/net8.0/linux-x64/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-musl-x64.zip bin/Release/net8.0/linux-musl-x64/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-musl-arm64.zip bin/Release/net8.0/linux-musl-arm64/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-arm.zip bin/Release/net8.0/linux-arm/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-linux-arm64.zip bin/Release/net8.0/linux-arm64/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-win-x64.zip bin/Release/net8.0/win-x64/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-win-x86.zip bin/Release/net8.0/win-x86/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-win-arm64.zip bin/Release/net8.0/win-arm64/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-macos-x64.zip bin/Release/net8.0/osx-x64/publish/*
-          zip -r release-artifacts/Chatterino-Nightly-Update-Checker-macos-arm64.zip bin/Release/net8.0/osx-arm64/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-linux-x64.zip bin/Release/net10.0/linux-x64/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-linux-musl-x64.zip bin/Release/net10.0/linux-musl-x64/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-linux-musl-arm64.zip bin/Release/net10.0/linux-musl-arm64/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-linux-arm.zip bin/Release/net10.0/linux-arm/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-linux-arm64.zip bin/Release/net10.0/linux-arm64/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-win-x64.zip bin/Release/net10.0/win-x64/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-win-x86.zip bin/Release/net10.0/win-x86/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-win-arm64.zip bin/Release/net10.0/win-arm64/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-macos-x64.zip bin/Release/net10.0/osx-x64/publish/*
+          zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-macos-arm64.zip bin/Release/net10.0/osx-arm64/publish/*
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
