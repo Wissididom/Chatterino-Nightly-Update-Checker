@@ -58,7 +58,7 @@ namespace ChatterinoNightlyUpdateChecker
                     var coauthors = new List<string>();
                     if (!string.IsNullOrEmpty(description))
                     {
-                        coauthors.AddRange(from line in description.Split('\n') where line.StartsWith("Co-authored-by:") select line["Co-authored-by:".Length..] into coauthor select coauthor[..coauthor.IndexOf("&lt;", StringComparison.InvariantCulture)].Trim());
+                        coauthors.AddRange(from line in description.Split('\n') where line.StartsWith("Co-authored-by:") select line["Co-authored-by:".Length..] into coauthor select coauthor[..coauthor.IndexOf('<', StringComparison.InvariantCulture)].Trim());
                     }
                     var authorName = commit.Commit?.Author?.Name ?? commit.Commit?.Committer?.Name;
                     string author;
