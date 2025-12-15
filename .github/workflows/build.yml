@@ -47,7 +47,7 @@ jobs:
           zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-macos-x64.zip bin/Release/net10.0/osx-x64/publish/*
           zip -rj release-artifacts/Chatterino-Nightly-Update-Checker-macos-arm64.zip bin/Release/net10.0/osx-arm64/publish/*
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Chatterino-Nightly-Update-Checker
           path: release-artifacts
