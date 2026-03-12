@@ -17,7 +17,7 @@ namespace ChatterinoNightlyUpdateChecker
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new("application/vnd.github+json"));
             client.DefaultRequestHeaders.Add("User-Agent", "Wissididom/Chatterino-Nightly-Update-Checker");
-            client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
+            client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2026-03-10");
             var commits = JsonSerializer.Deserialize<ListCommitsResponse>(await client.GetStringAsync("https://api.github.com/repos/Chatterino/chatterino2/commits?sha=nightly-build").ConfigureAwait(false));
             if (commits is null)
             {
